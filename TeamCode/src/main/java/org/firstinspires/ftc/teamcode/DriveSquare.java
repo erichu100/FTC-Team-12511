@@ -53,14 +53,12 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Forward", group="Linear Opmode")  // @Autonomous(...) is the other common choice
+@Autonomous(name="DriveSquare", group="Linear Opmode")  // @Autonomous(...) is the other common choice
 //@Disabled
-public class Forward extends LinearOpMode {
+public class DriveSquare extends LinearOpMode {
 
     /* Declare OpMode members. */
     private ElapsedTime runtime = new ElapsedTime();
-    // DcMotor leftMotor = null;
-    // DcMotor rightMotor = null;
     DcMotor leftMotor;
     DcMotor rightMotor;
     double power = 0.5;
@@ -68,22 +66,28 @@ public class Forward extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-        leftMotor = hardwareMap.dcMotor.get("Left_Motor");
-        rightMotor = hardwareMap.dcMotor.get("Right_Motor");
-        leftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
+
+        leftMotor  = hardwareMap.dcMotor.get("Left_Motor");
+        rightMotor = hardwareMap.dcMotor.get("Right_Motor");
+
+        leftMotor.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
+
+        // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
 
-        leftMotor.setPower(power);
-        rightMotor.setPower(power);
-        telemetry.addData("Meow", "Reow");
-
-        sleep(10000);
-
-        power = 0.0;
-        leftMotor.setPower(power);
         // run until the end of the match (driver presses STOP)
-    }
+        for (int i=0;i<4;i++){
+            leftMotor.setPower(power);
+            rightMotor.setPower(power);
+            sleep(2000);
 
+            leftMotor.setPower(-power);
+            rightMotor.setPower(power);
+            sleep(1000);
+        }
+        leftMotor.setPower(0.0);
+        rightMotor.setPower(0.0);
+    }
 }

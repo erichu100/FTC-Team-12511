@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DcMotorController;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
@@ -13,8 +13,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class EncoderOpMode extends OpMode
 {
     // Declare motors
-    DcMotor motorLeft = null;
-    DcMotor motorRight = null;
+    DcMotor Left_Motor = null;
+    DcMotor Right_Motor = null;
 
 
     /* Declare OpMode members. */
@@ -30,11 +30,11 @@ public class EncoderOpMode extends OpMode
     public void init() {
         telemetry.addData("Status", "Initialized");
         //Initialize motors
-        motorLeft = hardwareMap.dcMotor.get("motorLeft");
-        motorRight = hardwareMap.dcMotor.get("motorRight");
-
-        motorLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
-        motorRight.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
+        Left_Motor = hardwareMap.dcMotor.get("Left_Motor");
+        Right_Motor = hardwareMap.dcMotor.get("Right_Motor");
+        Left_Motor.setDirection(DcMotorSimple.Direction.REVERSE);
+        Left_Motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Right_Motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         /* eg: Initialize the hardware variables. Note that the strings used here as parameters
          * to 'get' must correspond to the names assigned during the robot configuration
@@ -65,31 +65,31 @@ public class EncoderOpMode extends OpMode
     public void start() {
 
         runtime.reset();
-        motorLeft.setMode(DcMotor.RunMode.RESET_ENCODERS);
-        motorRight.setMode(DcMotor.RunMode.RESET_ENCODERS);
+        Left_Motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Right_Motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         //set target position
-        motorLeft.setTargetPosition(1440);
-        motorRight.setTargetPosition(1440);
+        Left_Motor.setTargetPosition(1440);
+        Right_Motor.setTargetPosition(1440);
 
         //Set to RUN_TO_POSITION mode
-        motorLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motorRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        Left_Motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        Right_Motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         //Set drive power
-        motorLeft.setPower(0.5);
-        motorRight.setPower(0.5);
+        Left_Motor.setPower(0.5);
+        Right_Motor.setPower(0.5);
 
-        while(motorLeft.isBusy() && motorRight.isBusy())
+        while(Left_Motor.isBusy() && Right_Motor.isBusy())
         {
             //Wait until target position is reached
         }
 
         //Stop and change modes back to normal
-        motorLeft.setPower(0);
-        motorRight.setPower(0);
-        motorLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
-        motorRight.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
+        Left_Motor.setPower(0);
+        Right_Motor.setPower(0);
+        Left_Motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Right_Motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
     }
 

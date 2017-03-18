@@ -89,8 +89,7 @@ public class EncoderOpMode extends OpMode
         Left_Motor.setPower(0);
         Right_Motor.setPower(0);
         Left_Motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        Right_Motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
+        Right_Motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);// test
     }
 
     /*

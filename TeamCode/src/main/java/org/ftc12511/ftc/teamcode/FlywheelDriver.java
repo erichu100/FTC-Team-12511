@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 /**
  * Created by lucas on 4/14/2017.
  */
-
 public class FlywheelDriver {
     private DcMotor Left_Flywheel = null;
     private DcMotor Right_Flywheel = null;

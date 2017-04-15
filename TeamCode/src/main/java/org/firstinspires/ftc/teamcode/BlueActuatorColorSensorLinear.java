@@ -33,12 +33,17 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.I2cAddr;
+import com.qualcomm.robotcore.hardware.I2cDevice;
+import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
+import com.qualcomm.robotcore.hardware.I2cDeviceSynchImpl;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.ftc12511.ftc.teamcode.EncoderBasedNavigator;
 
 /**
  * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
@@ -53,37 +58,87 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Forward", group="Linear Opmode")  // @Autonomous(...) is the other common choice
+@Autonomous(name="BlueActuatorColorSensorLinear", group="Linear Opmode")  // @Autonomous(...) is the other common choice
 //@Disabled
-public class Forward extends LinearOpMode {
+public class BlueActuatorColorSensorLinear extends LinearOpMode {
 
     /* Declare OpMode members. */
     private ElapsedTime runtime = new ElapsedTime();
-    // DcMotor leftMotor = null;
-    // DcMotor rightMotor = null;
+    byte[] colorCcache;
+    public static final int ErrorMargin = 10;
+    I2cDevice colorC;
+    I2cDeviceSynch colorCReader;
+    Servo servo;
+    double servoPosition = 0.0;
     DcMotor leftMotor;
     DcMotor rightMotor;
     double power = 0.5;
+    boolean timeToStop = false;
+
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
+        EncoderBasedNavigator navigator;
+        colorC = hardwareMap.i2cDevice.get("cc");
+        colorCReader = new I2cDeviceSynchImpl(colorC, I2cAddr.create8bit(0x3c), false);
+        colorCReader.engage();
+        servo = hardwareMap.servo.get("servo");
+        servo.setPosition(servoPosition);
         leftMotor = hardwareMap.dcMotor.get("Left_Motor");
         rightMotor = hardwareMap.dcMotor.get("Right_Motor");
         leftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-
+        navigator= new EncoderBasedNavigator();
+        navigator.Init(this.telemetry, this.hardwareMap);
         waitForStart();
         runtime.reset();
+        colorCReader.write8(3,1);
 
-        leftMotor.setPower(power);
-        rightMotor.setPower(power);
-        telemetry.addData("Meow", "Reow");
-
-        sleep(1000);
-
-        power = 0.0;
-        leftMotor.setPower(power);
         // run until the end of the match (driver presses STOP)
+        while (opModeIsActive()) {
+
+            //if (!reachedBeacon1)
+            //{
+            //    reachedBeacon1 = true;
+            //}
+            navigator.DriveByEncoder(1400, 1400, 5.0);//Drive to corner
+            navigator.DriveByEncoder(1400, -1400, 2.5); //Turn 90 degrees
+
+            while (timeToStop == false){
+                telemetry.addData("Status", "Run Time: " + runtime.toString());
+                telemetry.update();
+
+                leftMotor.setPower(power);
+                rightMotor.setPower(power);
+                colorCcache = colorCReader.read(0x04, 1);
+
+                //display values
+                telemetry.addData("2 #C", colorCcache[0] & 0xFF);
+
+                if (colorCcache[0] > 9 ){
+                    leftMotor.setPower(0);
+                    rightMotor.setPower(0);
+                    double servoPosition=1.0;
+                    servo.setPosition(servoPosition);
+                    sleep(5000);
+                }
+                if (colorCcache[0] < 4 ) {
+                    leftMotor.setPower(0);
+                    rightMotor.setPower(0);
+                    double servoPosition=0.0;
+                    sleep(5000);
+                    servo.setPosition(servoPosition);
+                    timeToStop = true;
+                    leftMotor.setPower(power);
+                    rightMotor.setPower(power);
+                }
+            }
+
+
+
+            idle(); // Always call idle() at the bottom of your while(opModeIsActive()) loop
+        }
     }
+
 
 }

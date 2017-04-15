@@ -18,6 +18,8 @@ Support is available by emailing support@modernroboticsinc.com.
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.I2cDevice;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
@@ -26,10 +28,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
-@Autonomous(name = "Flip", group = "MRI")
+@Autonomous(name = "BlueActuatorColorSensor", group = "MRI")
 // @Autonomous(...) is the other common choice
 //@Disabled
-public class Flip extends OpMode {
+public class BlueActuatorColorSensor extends OpMode {
 
     /* Declare OpMode members. */
     private ElapsedTime runtime = new ElapsedTime();
@@ -40,7 +42,10 @@ public class Flip extends OpMode {
     I2cDeviceSynch colorCreader;
     Servo servo;
     double servoPosition = 0.0;
-
+    DcMotor leftMotor;
+    DcMotor rightMotor;
+    double power = 0.5;
+    boolean timetostop = true;
 
 
     /*
@@ -56,6 +61,10 @@ public class Flip extends OpMode {
         colorCreader.engage();
         servo = hardwareMap.servo.get("servo");
         servo.setPosition(servoPosition);
+        leftMotor = hardwareMap.dcMotor.get("Left_Motor");
+        rightMotor = hardwareMap.dcMotor.get("Right_Motor");
+        leftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
     }
 
     /*
@@ -72,7 +81,7 @@ public class Flip extends OpMode {
     public void start() {
         runtime.reset();
 
-
+        colorCreader.write8(3,1);
     }
 
     /*
@@ -87,20 +96,31 @@ public class Flip extends OpMode {
         //This seems like a lot but if your program wrote to the long term memory every time though the main loop, it would shorten the life of your sensor.
 
 
-
+        leftMotor.setPower(power);
+        rightMotor.setPower(power);
         colorCcache = colorCreader.read(0x04, 1);
 
         //display values
         telemetry.addData("2 #C", colorCcache[0] & 0xFF);
+
         if (colorCcache[0] > 9 ){
+            leftMotor.setPower(0);
+            rightMotor.setPower(0);
             double servoPosition=1.0;
             servo.setPosition(servoPosition);
         }
-        else{
+        if (colorCcache[0] < 4 ) {
+            leftMotor.setPower(0);
+            rightMotor.setPower(0);
             double servoPosition=0.0;
             servo.setPosition(servoPosition);
+            timetostop = true;
+            leftMotor.setPower(power);
+            rightMotor.setPower(power);
         }
-
+        while (timetostop=true){
+            Thread.sleep(10000);
+        }
     }
 
     /*

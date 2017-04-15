@@ -56,7 +56,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 @Autonomous(name="DriveSquare", group="Linear Opmode")  // @Autonomous(...) is the other common choice
 //@Disabled
 public class DriveSquare extends LinearOpMode {
-
     /* Declare OpMode members. */
     private ElapsedTime runtime = new ElapsedTime();
     DcMotor leftMotor;

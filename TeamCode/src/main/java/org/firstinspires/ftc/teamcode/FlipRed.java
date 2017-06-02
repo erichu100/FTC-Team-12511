@@ -91,12 +91,12 @@ public class FlipRed extends OpMode {
 
         //display values
         telemetry.addData("2 #C", colorCcache[0] & 0xFF);
-        if (colorCcache[0] < 3 ){
+        if (colorCcache[0] < 3 && colorCcache[0] >0){
             double servoPosition=1.0;
             servo.setPosition(servoPosition);
         }
         else{
-            double servoPosition=0.0;
+            double servoPosition=0.5;
             servo.setPosition(servoPosition);
         }
 

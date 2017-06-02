@@ -72,14 +72,14 @@ public class BlueActuatorColorSensorLinear extends LinearOpMode {
     double servoPosition = 0.0;
     DcMotor leftMotor;
     DcMotor rightMotor;
-    double power = 0.5;
     boolean timeToStop = false;
+    EncoderBasedNavigator navigator;
+
 
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-        EncoderBasedNavigator navigator;
         colorC = hardwareMap.i2cDevice.get("cc");
         colorCReader = new I2cDeviceSynchImpl(colorC, I2cAddr.create8bit(0x3c), false);
         colorCReader.engage();
@@ -88,6 +88,7 @@ public class BlueActuatorColorSensorLinear extends LinearOpMode {
         leftMotor = hardwareMap.dcMotor.get("Left_Motor");
         rightMotor = hardwareMap.dcMotor.get("Right_Motor");
         leftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        colorCcache = colorCReader.read(0x04, 1);
         navigator= new EncoderBasedNavigator();
         navigator.Init(this.telemetry, this.hardwareMap);
         waitForStart();
@@ -101,43 +102,58 @@ public class BlueActuatorColorSensorLinear extends LinearOpMode {
             //{
             //    reachedBeacon1 = true;
             //}
-            navigator.DriveByEncoder(1400, 1400, 5.0);//Drive to corner
-            navigator.DriveByEncoder(1400, -1400, 2.5); //Turn 90 degrees
 
-            while (timeToStop == false){
-                telemetry.addData("Status", "Run Time: " + runtime.toString());
-                telemetry.update();
 
-                leftMotor.setPower(power);
-                rightMotor.setPower(power);
-                colorCcache = colorCReader.read(0x04, 1);
 
-                //display values
-                telemetry.addData("2 #C", colorCcache[0] & 0xFF);
 
-                if (colorCcache[0] > 9 ){
-                    leftMotor.setPower(0);
-                    rightMotor.setPower(0);
-                    double servoPosition=1.0;
-                    servo.setPosition(servoPosition);
-                    sleep(5000);
-                }
-                if (colorCcache[0] < 4 ) {
-                    leftMotor.setPower(0);
-                    rightMotor.setPower(0);
-                    double servoPosition=0.0;
-                    sleep(5000);
-                    servo.setPosition(servoPosition);
-                    timeToStop = true;
-                    leftMotor.setPower(power);
-                    rightMotor.setPower(power);
-                }
-            }
-
+            BeaconPressing();
 
 
             idle(); // Always call idle() at the bottom of your while(opModeIsActive()) loop
         }
+    }
+
+    private void BeaconPressing() {
+        double power = 0.5;
+        timeToStop = false;
+        telemetry.addData("2 #C", colorCcache[0] & 0xFF);
+        telemetry.addData("Stage", "Phase"+"ColorDetection");
+        telemetry.addData("Status", "Run Time: " + runtime.toString());
+        telemetry.update();
+        leftMotor.setPower(power);
+        rightMotor.setPower(power);
+        colorCcache = colorCReader.read(0x04, 1);
+
+        //display values
+
+
+        if (colorCcache[0] > 9 && servoPosition != 1.0){
+            telemetry.addData("2 #C", colorCcache[0] & 0xFF);
+            telemetry.addData("Stage", "detectedRed");
+            telemetry.update();
+            leftMotor.setPower(0);
+            rightMotor.setPower(0);
+            double servoPosition=1.0;
+            servo.setPosition(servoPosition);
+            sleep(5000);
+            navigator.DriveByEncoder(1400,1400,0.5);
+        }
+        if (colorCcache[0] < 4 && colorCcache[0] >0 && servoPosition != 0.5) {
+            telemetry.addData("2 #C", colorCcache[0] & 0xFF);
+            telemetry.addData("Stage", "detectedBlue");
+            telemetry.update();
+            leftMotor.setPower(0);
+            rightMotor.setPower(0);
+            double servoPosition=0.5;
+            servo.setPosition(servoPosition);
+            sleep(5000);
+            timeToStop = true;
+            leftMotor.setPower(power);
+            rightMotor.setPower(power);
+            navigator.DriveByEncoder(3200,3200,0.5);
+        }
+        telemetry.addData("Status", "Termination" + "finished");
+        telemetry.update();
     }
 
 

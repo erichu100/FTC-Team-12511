@@ -95,7 +95,7 @@ public class RotateServoTeleOp extends OpMode
             telemetry.addData("Status", "Phase" + "FullExtend");
         }
         if (gamepad1.b){
-            servoPosition=0.0;
+            servoPosition=0.1;
             telemetry.addData("Status", "Phase" + "FullRetract");
         }
         if (gamepad1.x){

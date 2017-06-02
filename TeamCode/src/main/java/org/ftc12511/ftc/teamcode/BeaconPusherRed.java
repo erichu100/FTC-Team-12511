@@ -10,9 +10,7 @@ import com.qualcomm.robotcore.hardware.I2cDeviceSynchImpl;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-/**
- * Created by Eric on 3/25/2017.
- */
+
 @Autonomous(name="BeaconPusherRed", group="Linear Opmode")  // @Autonomous(...) is the other common choice
 //@Disabled
 public class BeaconPusherRed extends LinearOpMode
@@ -30,7 +28,6 @@ public class BeaconPusherRed extends LinearOpMode
     double servoPosition = 0.0;
     DcMotor leftMotor;
     DcMotor rightMotor;
-    double power = 0.5;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -42,6 +39,8 @@ public class BeaconPusherRed extends LinearOpMode
         colorCreader.engage();
         servo = hardwareMap.servo.get("servo");
         servo.setPosition(servoPosition);
+        leftMotor = hardwareMap.dcMotor.get("Left_Motor");
+        rightMotor = hardwareMap.dcMotor.get("Right_Motor");
         waitForStart();
         runtime.reset();
 
@@ -68,44 +67,56 @@ public class BeaconPusherRed extends LinearOpMode
         double pi = 3.14159265358978;
         double Circumfrence = WheelDiameterInches * pi;
         double WheelDistance = 16.0;
-        boolean correct = false;
-        // Forward
-        navigator.DriveByEncoder((int) (1440 * 3.5), (int) (+1440 * 3.5), 0.5);
-        // Turn.
-        navigator.DriveByEncoder((int) (1440 * 1.8), -(int) (+1440 * 1.8), 0.5);
-        //Detect which color the beacon is
+
         colorCcache = colorCreader.read(0x04, 1);
+        servoPosition = 1.0;
+        servo.setPosition(servoPosition);
+        telemetry.addData("Initialize 2 #C", colorCcache[0] & 0xFF);
+        telemetry.update();
         //while there is no color, drive forward
         while (colorCcache[0] == 0 || colorCcache[0] == 16) {
+            colorCcache = colorCreader.read(0x04, 1);
             leftMotor.setPower(power);
             rightMotor.setPower(power);
+            telemetry.addData("Driveforward 2 #C", colorCcache[0] & 0xFF);
+            telemetry.update();
         }
         //when a color is detected, stop
         leftMotor.setPower(0);
         rightMotor.setPower(0);
         //display values
-        telemetry.addData("2 #C", colorCcache[0] & 0xFF);
+        telemetry.addData("BeginDetection 2 #C", colorCcache[0] & 0xFF);
+        telemetry.update();
         //while a color is detected...
         while (colorCcache[0] != 0 || colorCcache[0] != 16) {
+            telemetry.addData("Relocate 2 #C", colorCcache[0] & 0xFF);
+            telemetry.update();
             //If the beacon is blue, extend servo and change correct to false
-            if (colorCcache[0] < 3 && colorCcache[0] > 0) {
+            if (colorCcache[0] < 4 && colorCcache[0] > 0 && servoPosition != 1.0) {
                 leftMotor.setPower(0);
                 rightMotor.setPower(0);
                 double servoPosition = 1.0;
                 servo.setPosition(servoPosition);
-                correct = false;
+                telemetry.addData("Ascend 2 #C", colorCcache[0] & 0xFF);
+                telemetry.update();
+                sleep(3000);
             }
             //If the beacon is red, retract the servo and change correct to true
-            if (colorCcache[0]>9){
+            if (colorCcache[0]>9 && servoPosition != 0.0){
                 leftMotor.setPower(0);
                 rightMotor.setPower(0);
                 double servoPosition = 0.0;
                 servo.setPosition(servoPosition);
-                correct = true;
+                telemetry.addData("Descend 2 #C", colorCcache[0] & 0xFF);
+                telemetry.update();
+                sleep(3000);
+
             }
+
             //Drive forward
             leftMotor.setPower(power);
             rightMotor.setPower(power);
+            colorCcache = colorCreader.read(0x04, 1);
 
 
         }
@@ -119,25 +130,12 @@ public class BeaconPusherRed extends LinearOpMode
      * Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
      */
     public void Loop() {
+        telemetry.addData("End 2 #C", colorCcache[0] & 0xFF);
+        telemetry.update();
 
-        // not sensitive.
-        if (Math.abs(gamepad1.left_stick_y) < 0.1 && Math.abs(gamepad1.right_stick_y) < 0.1)
-        {
-            //telemetry.addData("Left Position", leftMotor.getCurrentPosition());
-            //telemetry.addData("Right Position", rightMotor.getCurrentPosition());
-            return;
-        }
-
-        int x = (int)(3* 1440 * -gamepad1.left_stick_y);
-        int y = (int)(3* 1440 * -gamepad1.right_stick_y);
-
-        navigator.DriveByEncoder(x, y, 1);
-        // eg: Run wheels in tank mode (note: The joystick goes negative when pushed forwards)
-        telemetry.addData("Status", "Running: " + runtime.toString());
 
 
     }
-
 
 }
 

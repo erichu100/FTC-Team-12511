@@ -97,7 +97,7 @@ public class FlipBlue extends OpMode {
             servo.setPosition(servoPosition);
         }
         else{
-            double servoPosition=0.0;
+            double servoPosition=0.5;
             servo.setPosition(servoPosition);
         }
 

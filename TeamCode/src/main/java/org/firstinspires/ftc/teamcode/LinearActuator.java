@@ -36,8 +36,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
@@ -53,37 +52,30 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Forward", group="Linear Opmode")  // @Autonomous(...) is the other common choice
+@Autonomous(name="LinearActuator", group="Linear Opmode")  // @Autonomous(...) is the other common choice
 //@Disabled
-public class Forward extends LinearOpMode {
+public class LinearActuator extends LinearOpMode {
 
     /* Declare OpMode members. */
     private ElapsedTime runtime = new ElapsedTime();
-    // DcMotor leftMotor = null;
-    // DcMotor rightMotor = null;
-    DcMotor leftMotor;
-    DcMotor rightMotor;
-    double power = 0.5;
+    Servo linearActuator;
+    double actuatorPosition=0.0;
+
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-        leftMotor = hardwareMap.dcMotor.get("Left_Motor");
-        rightMotor = hardwareMap.dcMotor.get("Right_Motor");
-        leftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        linearActuator=hardwareMap.servo.get("servo");
+        linearActuator.setPosition(actuatorPosition);
         waitForStart();
         runtime.reset();
-
-        leftMotor.setPower(power);
-        rightMotor.setPower(power);
-        telemetry.addData("Meow", "Reow");
-
-        sleep(1000);
-
-        power = 0.0;
-        leftMotor.setPower(power);
+        actuatorPosition=0.5;
+        linearActuator.setPosition(actuatorPosition);
+        sleep(2100);
+        actuatorPosition=1.0;
+        linearActuator.setPosition(actuatorPosition);
         // run until the end of the match (driver presses STOP)
-    }
 
+    }
 }

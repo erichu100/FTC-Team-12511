@@ -26,10 +26,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
-@Autonomous(name = "Flip", group = "MRI")
+@Autonomous(name = "FlipBlue", group = "MRI")
 // @Autonomous(...) is the other common choice
 //@Disabled
-public class Flip extends OpMode {
+public class FlipBlue extends OpMode {
 
     /* Declare OpMode members. */
     private ElapsedTime runtime = new ElapsedTime();
@@ -56,7 +56,6 @@ public class Flip extends OpMode {
         colorCreader.engage();
         servo = hardwareMap.servo.get("servo");
         servo.setPosition(servoPosition);
-
     }
 
     /*

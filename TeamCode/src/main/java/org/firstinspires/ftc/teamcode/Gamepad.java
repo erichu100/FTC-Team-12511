@@ -37,6 +37,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
@@ -62,6 +63,7 @@ public class Gamepad extends LinearOpMode {
     // DcMotor rightMotor = null;
     DcMotor leftMotor;
     DcMotor rightMotor;
+    Servo servo;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -69,7 +71,8 @@ public class Gamepad extends LinearOpMode {
         telemetry.update();
         leftMotor = hardwareMap.dcMotor.get("Left_Motor");
         rightMotor = hardwareMap.dcMotor.get("Right_Motor");
-
+        servo= hardwareMap.servo.get("servo");
+        double servoPosition = 1.0;
         leftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         waitForStart();
         runtime.reset();
@@ -84,6 +87,15 @@ public class Gamepad extends LinearOpMode {
             if(gamepad1.a){
                 leftMotor.setPower(0.5);
                 rightMotor.setPower(0.5);
+            }
+            if(gamepad1.b){
+                servoPosition=0.5;
+                servo.setPosition(servoPosition);
+                sleep(1000);
+            }
+            if(gamepad1.y){
+                servoPosition=1.0;
+                servo.setPosition(servoPosition);
             }
             else {
                 leftMotor.setPower(-gamepad1.left_stick_y);

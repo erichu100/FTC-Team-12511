@@ -73,6 +73,8 @@ public class BlueActuatorColorSensorLinear extends LinearOpMode {
     DcMotor leftMotor;
     DcMotor rightMotor;
     boolean timeToStop = false;
+    boolean finished = false;
+    boolean started = false;
     EncoderBasedNavigator navigator;
 
 
@@ -95,6 +97,7 @@ public class BlueActuatorColorSensorLinear extends LinearOpMode {
         runtime.reset();
         colorCReader.write8(3,1);
 
+
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
@@ -105,10 +108,18 @@ public class BlueActuatorColorSensorLinear extends LinearOpMode {
 
 
 
+            if (started==false && servoPosition != 1.0){
+                servoPosition=1.0;
+                servo.setPosition(servoPosition);
+                sleep(2000);
+            }
 
-            BeaconPressing();
-
-
+            if (finished==true && colorCcache [0]==0){
+                check();
+            }
+            else{
+                BeaconPressing();
+            }
             idle(); // Always call idle() at the bottom of your while(opModeIsActive()) loop
         }
     }
@@ -128,6 +139,7 @@ public class BlueActuatorColorSensorLinear extends LinearOpMode {
 
 
         if (colorCcache[0] > 9 && servoPosition != 1.0){
+            finished=true;
             telemetry.addData("2 #C", colorCcache[0] & 0xFF);
             telemetry.addData("Stage", "detectedRed");
             telemetry.update();
@@ -139,6 +151,7 @@ public class BlueActuatorColorSensorLinear extends LinearOpMode {
             navigator.DriveByEncoder(1400,1400,0.5);
         }
         if (colorCcache[0] < 4 && colorCcache[0] >0 && servoPosition != 0.5) {
+            finished = true;
             telemetry.addData("2 #C", colorCcache[0] & 0xFF);
             telemetry.addData("Stage", "detectedBlue");
             telemetry.update();
@@ -150,11 +163,23 @@ public class BlueActuatorColorSensorLinear extends LinearOpMode {
             timeToStop = true;
             leftMotor.setPower(power);
             rightMotor.setPower(power);
-            navigator.DriveByEncoder(3200,3200,0.5);
+            navigator.DriveByEncoder(2800,2800,0.5);
         }
         telemetry.addData("Status", "Termination" + "finished");
         telemetry.update();
+        started = true;
     }
+    private void check() {
+        telemetry.addData("2 #C", colorCcache[0] & 0xFF);
+        telemetry.addData("Stage", "checking");
+        telemetry.update();
+        servoPosition=1.0;
+        servo.setPosition(servoPosition);
+        sleep(1000);
+        navigator.DriveByEncoder(0,-280,0.1);
+        navigator.DriveByEncoder(-3000,-3000,0.5);
+        navigator.DriveByEncoder(0,300, 0.1);
+        finished=false;
 
-
+    }
 }
